@@ -15,6 +15,8 @@ import {
     async canActivate(context: ExecutionContext): Promise<boolean> {
       const request = context.switchToHttp().getRequest();
       const token = request.cookies['accessToken'];
+      console.log("Entered");
+      
   
       if (!token) {
         throw new ForbiddenException('Authorization token not provided');
@@ -24,6 +26,8 @@ import {
         const decoded = await this.jwtService.verifyAsync(token, {
           secret: process.env.ACCESS_TOKEN_KEY,
         });
+        console.log(decoded , "fsss");
+        
         if (!decoded || decoded.isAdmin !==true) {
           console.log(decoded.isAdmin , "adsjfk");
           
