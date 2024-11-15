@@ -1,4 +1,4 @@
-import { ConflictException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { ConflictException, ForbiddenException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { User } from '../user/user.schema';
 import { UserDocument } from '../user/user.schema';
@@ -8,6 +8,8 @@ import { LoginDto, RegisterDto } from './authentication.dto';
 import { ResponseHandler } from 'src/utility/success-response';
 import { SuccessHandler } from 'src/interfaces/response.interface';
 import * as bcrypt from 'bcrypt'
+import { loginResponse, refreshTokenResponse } from 'src/interfaces/authentication.interface';
+import { Types } from 'mongoose';
 @Injectable()
 export class AuthenticationService {
   constructor(
@@ -28,10 +30,15 @@ export class AuthenticationService {
   private async generateAccessToken(user): Promise<string> {
     const payload = {
       id: user._id,
+      username:user.username,
       firstName: user.firstName,
       lastName: user.lastName,
       email: user.email,
-      role: user.role,
+      status:user.status,
+      bio:user.bio,
+      isAdmin: user.isAdmin,
+      address:user.address,
+      posts:user.posts
     };
     const secretKey = process.env.ACCESS_TOKEN_KEY;
 
@@ -54,11 +61,11 @@ export class AuthenticationService {
     }
     const registeredUser = new this.userModel({ ...RegisterDto })
     await registeredUser.save()
-    return this.responseHandler.successHandler(registeredUser, "User registered Succesfully")
+    return this.responseHandler.successHandler(null, "User registered Succesfully")
   }
 
-  async loginUser(LoginDto: LoginDto): Promise<SuccessHandler> {
-    const user = await this.userModel.findOne({ email: LoginDto.email })
+  async loginUser(LoginDto: LoginDto): Promise<SuccessHandler<loginResponse>> {
+    const user = await this.userModel.findOne({    $or: [{username:LoginDto.username}, {email:LoginDto.email}] })
     if (!user) {
       throw new NotFoundException('User not found');
     }
@@ -70,23 +77,72 @@ export class AuthenticationService {
 
     const accessToken = await this.generateAccessToken(user)
     const refreshToken = await this.generateRefreshToken(user)
-    if(!accessToken || !refreshToken){
+    if (!accessToken || !refreshToken) {
       throw new ConflictException("Tokens are not Generated")
     }
 
     user.refreshToken = refreshToken
     await user.save()
     const newUser = user.toObject()
-    const userWithoutSensitiveData = this.removeFields(newUser, ['password' , 'refreshToken'])
-    const loggedInUser = {
-      user:userWithoutSensitiveData,
-      tokens:{
-        accessToken , 
+    const userWithoutSensitiveData = this.removeFields(newUser, ['password', 'refreshToken', '__v', 'createdAt', 'updatedAt'])
+    const loggedInUser: loginResponse = {
+      user: userWithoutSensitiveData,
+      tokens: {
+        accessToken,
         refreshToken
       }
+
     }
-    return this.responseHandler.successHandler(loggedInUser , "User loggedIn SuccessFully")
+    return this.responseHandler.successHandler(loggedInUser, "User loggedIn SuccessFully")
   }
+
+
+  async logoutUser(userId: string): Promise<SuccessHandler> {
+    const user = await this.userModel.findOneAndUpdate(
+      { _id: userId },
+      {
+        $unset: { refreshToken: 1 }
+      },
+      { new: true }
+    )
+
+    if (!user) {
+      throw new NotFoundException("User not found")
+    }
+
+    return this.responseHandler.successHandler(null, "User loggedOut Succesfully")
+  }
+
+
+  async refreshToken(incomingRefreshToken: string): Promise<SuccessHandler<refreshTokenResponse>> {
+
+    const decodedToken = await this.jwtService.verifyAsync(incomingRefreshToken, {
+      secret: process.env.REFRESH_TOKEN_KEY,
+    });
+    const user = await this.userModel.findById(decodedToken.id);
+    if (!user || user.refreshToken !== incomingRefreshToken) {
+      throw new UnauthorizedException('Invalid refresh token');
+    }
+
+    const accessToken = await this.generateAccessToken(user);
+    const newRefreshToken = await this.generateRefreshToken(user);
+    if (!accessToken || !newRefreshToken) {
+      throw new ForbiddenException('there is an issue with tokens');
+    }
+    user.refreshToken = newRefreshToken;
+    await user.save();
+
+    const newTokens = {
+      tokens:{
+        accessToken,
+        refreshToken:newRefreshToken
+      }
+    }
+
+    return this.responseHandler.successHandler( newTokens,"Tokens refreshed Sucessfully")
+  }
+
+
 
 
 

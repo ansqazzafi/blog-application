@@ -1,7 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import { Document, Schema as MongooseSchema } from 'mongoose';
 import { UserAddress } from 'src/interfaces/user.interface';  
-
 @Schema({ timestamps: true })
 export class User {
 
@@ -23,8 +22,8 @@ export class User {
   @Prop({ required: true })
   password: string;
 
-  @Prop({ default: 'user' })
-  role: string;
+  @Prop({ default: false })
+  isAdmin: boolean;
 
 
   @Prop({ required:false })
@@ -40,6 +39,12 @@ export class User {
       },
    })
   address: UserAddress;  
+
+  @Prop({
+    type: [{ type: MongooseSchema.Types.ObjectId, ref: 'Post' }],
+    default: [],
+  })
+  posts: MongooseSchema.Types.ObjectId[];
 
   @Prop({ required: false })
   refreshToken: string;
