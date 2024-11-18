@@ -16,13 +16,13 @@ export class Post {
   authorId: MongooseSchema.Types.ObjectId; 
 
   @Prop({ required: true, default: false })
-  status: boolean; 
+  status?: boolean; 
 
   @Prop({ required: true, enum: PostCategory })  
   category: PostCategory; 
 
-  @Prop({ default: 0 })
-  likes: number; 
+  @Prop({ default: 0  , required:false})
+  likes?: number; 
 }
 
 export type PostDocument = Post & Document;

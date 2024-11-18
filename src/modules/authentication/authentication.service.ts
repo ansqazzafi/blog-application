@@ -4,12 +4,13 @@ import { User } from '../user/user.schema';
 import { UserDocument } from '../user/user.schema';
 import { Model } from 'mongoose';
 import { JwtService } from '@nestjs/jwt';
-import { LoginDto, RegisterDto } from './authentication.dto';
 import { ResponseHandler } from 'src/utility/success-response';
 import { SuccessHandler } from 'src/interfaces/response.interface';
 import * as bcrypt from 'bcrypt'
 import { loginResponse, refreshTokenResponse } from 'src/interfaces/authentication.interface';
 import { Types } from 'mongoose';
+import { RegisterUserDto } from 'src/dto/auth/register-user.dto';
+import { LoginUserDto } from 'src/dto/auth/login-user.dto';
 @Injectable()
 export class AuthenticationService {
   constructor(
@@ -54,7 +55,7 @@ export class AuthenticationService {
   }
 
 
-  async registerUser(RegisterDto: RegisterDto): Promise<SuccessHandler> {
+  async registerUser(RegisterDto: RegisterUserDto): Promise<SuccessHandler> {
     const existingUser = await this.userModel.findOne({ email: RegisterDto.email })
     if (existingUser) {
       throw new ConflictException("User already Exist with this Email");
@@ -64,7 +65,7 @@ export class AuthenticationService {
     return this.responseHandler.successHandler(null, "User registered Succesfully")
   }
 
-  async loginUser(LoginDto: LoginDto): Promise<SuccessHandler<loginResponse>> {
+  async loginUser(LoginDto: LoginUserDto): Promise<SuccessHandler<loginResponse>> {
     const user = await this.userModel.findOne({    $or: [{username:LoginDto.username}, {email:LoginDto.email}] })
     if (!user) {
       throw new NotFoundException('User not found');

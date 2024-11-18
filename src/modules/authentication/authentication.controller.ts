@@ -1,11 +1,12 @@
 import { Body, Controller, Get, Post, UsePipes, Res, Req, NotFoundException } from '@nestjs/common';
 import { AuthenticationService } from './authentication.service';
-import { LoginDto, RegisterDto } from './authentication.dto';
 import { HashPasswordPipe } from 'src/pipes/hash-password.pipe';
 import { SuccessHandler } from 'src/interfaces/response.interface';
 import { Request, Response } from 'express';
 import { User } from '../user/user.schema';
 import { loginResponse, refreshTokenResponse } from 'src/interfaces/authentication.interface';
+import { RegisterUserDto } from 'src/dto/auth/register-user.dto';
+import { LoginUserDto } from 'src/dto/auth/login-user.dto';
 @Controller('authentication')
 export class AuthenticationController {
     constructor(private readonly authService: AuthenticationService) { }
@@ -13,14 +14,14 @@ export class AuthenticationController {
 
     @Post('register-user')
     @UsePipes(HashPasswordPipe)
-    async registerUser(@Body() registerDto: RegisterDto): Promise<SuccessHandler> {
+    async registerUser(@Body() registerDto: RegisterUserDto): Promise<SuccessHandler> {
         console.log(registerDto);
         return await this.authService.registerUser(registerDto)
     }
 
     @Post('login-user')
     async loginUser(
-        @Body() LoginDto: LoginDto,
+        @Body() LoginDto: LoginUserDto,
         @Res({ passthrough: true }) response: Response
     ): Promise<SuccessHandler<loginResponse>> {
         const loggedInUser = await this.authService.loginUser(LoginDto);

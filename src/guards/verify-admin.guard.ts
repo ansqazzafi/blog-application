@@ -26,11 +26,7 @@ import {
         const decoded = await this.jwtService.verifyAsync(token, {
           secret: process.env.ACCESS_TOKEN_KEY,
         });
-        console.log(decoded , "fsss");
-        
         if (!decoded || decoded.isAdmin !==true) {
-          console.log(decoded.isAdmin , "adsjfk");
-          
           throw new ForbiddenException('Access restricted to admins');
         }
         request.user = decoded;

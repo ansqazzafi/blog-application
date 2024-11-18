@@ -5,8 +5,7 @@ import { Model } from 'mongoose';
 import { UserDocument } from '../user/user.schema';
 import { SuccessHandler } from 'src/interfaces/response.interface';
 import { ResponseHandler } from 'src/utility/success-response';
-import { error } from 'console';
-import { UpdateDto } from 'src/interfaces/user.interface';
+import { UpdateUserDto } from 'src/dto/user/update-user.dto';
 NotFoundException
 @Injectable()
 export class UserService {
@@ -46,7 +45,7 @@ export class UserService {
   }
 
 
-  public async updateUser(id:string , updateDto:UpdateDto):Promise<SuccessHandler<User>>{
+  public async updateUser(id:string , updateDto:UpdateUserDto):Promise<SuccessHandler<User>>{
     const updatedUser = await this.userModel.findOneAndUpdate(
       { _id: id },
       { $set: updateDto },  
@@ -59,6 +58,16 @@ export class UserService {
 
     return this.responseHandler.successHandler(updatedUser , "user Updated Successfully")
 
+  }
+
+
+  public async deleteUser(id:string):Promise<SuccessHandler<User>>{
+    const deletedUser = await this.userModel.findByIdAndDelete(id).select('-password -refreshToken')
+    if(!deletedUser){
+      throw new NotFoundException("User not found")
+    }
+
+    return this.responseHandler.successHandler(deletedUser , "User Deleted SuccessFully")
   }
 
 

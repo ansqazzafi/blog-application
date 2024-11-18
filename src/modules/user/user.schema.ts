@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Schema as MongooseSchema } from 'mongoose';
-import { UserAddress } from 'src/interfaces/user.interface';  
+import { RegisterUserAddress } from 'src/interfaces/user.interface';  
 @Schema({ timestamps: true })
 export class User {
 
@@ -32,13 +32,13 @@ export class User {
   @Prop({ required: false })
   phoneNumber: string;
 
-  @Prop({ required: true,
+  @Prop({
     type: {
         city: { type: String, required: true },
         country: { type: String, required: true }, 
       },
    })
-  address: UserAddress;  
+  address: RegisterUserAddress;  
 
   @Prop({
     type: [{ type: MongooseSchema.Types.ObjectId, ref: 'Post' }],

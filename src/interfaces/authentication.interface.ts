@@ -1,23 +1,4 @@
-import { UserAddress } from "./user.interface";
-export interface RegisterDtoInterface {
-    username: string;
-    firstName: string;
-    lastName: string;
-    email: string;
-    password: string;
-    bio?: string;
-    phoneNumber?: string;
-    status?: boolean;
-    isAdmin?:boolean
-    address: UserAddress;
-  }
-
-
-  export interface LoginDtoInterface {
-    username?: string;
-    email?: string;
-    password: string;
-  }
+import { RegisterUserAddress } from "./user.interface";
 
 
   export interface loginResponse{
@@ -30,7 +11,7 @@ export interface RegisterDtoInterface {
       phoneNumber: string;
       status: boolean;
       isAdmin:boolean
-      address: UserAddress;
+      address: RegisterUserAddress;
       posts:[]
     },
     tokens:{
