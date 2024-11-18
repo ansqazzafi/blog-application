@@ -12,8 +12,6 @@ export class PostService {
   constructor(@InjectModel(Post.name) private postModel: Model<PostDocument>,
   @InjectModel(User.name) private userModel:Model<UserDocument>,
  private readonly reponseHandler:ResponseHandler) {}
-
-
   public async createPost( id:string , createPostDto:CreatePostDto):Promise<SuccessHandler>{
     const session = await this.postModel.db.startSession();
     session.startTransaction();
