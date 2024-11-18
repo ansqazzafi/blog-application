@@ -9,30 +9,33 @@ import { User, UserDocument } from '../user/user.schema';
 
 @Injectable()
 export class PostService {
-  constructor(@InjectModel(Post.name) private postModel: Model<PostDocument>,
-  @InjectModel(User.name) private userModel:Model<UserDocument>,
- private readonly reponseHandler:ResponseHandler) {}
-  public async createPost( id:string , createPostDto:CreatePostDto):Promise<SuccessHandler>{
+  constructor(
+    @InjectModel(Post.name) private postModel: Model<PostDocument>,
+    @InjectModel(User.name) private userModel: Model<UserDocument>,
+    private readonly reponseHandler: ResponseHandler
+  ) {}
+
+  public async createPost(id: string, createPostDto: CreatePostDto): Promise<SuccessHandler> {
     const session = await this.postModel.db.startSession();
     session.startTransaction();
+    try {
       const createdPost = new this.postModel({
         authorId: id,
         ...createPostDto,
       });
       await createdPost.save({ session });
-    
       await this.userModel.findOneAndUpdate(
         { _id: id },
         { $push: { posts: createdPost._id } },
         { session }
       );
-    
       await session.commitTransaction();
       session.endSession();
       return this.reponseHandler.successHandler(createdPost, "Post created successfully");
-
+    } catch (error) {
+      await session.abortTransaction();
+      session.endSession();
+      throw new Error('Transaction failed, post not created');
+    }
   }
-
-
-
 }

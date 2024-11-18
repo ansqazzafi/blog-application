@@ -19,7 +19,8 @@ import { UserSchema } from './modules/user/user.schema';
 import { JwtService } from '@nestjs/jwt';
 import { ResponseHandler } from './utility/success-response';
 import { ConfigModule } from '@nestjs/config';
-
+import { Post, PostSchema } from './modules/post/post.schema';
+Post
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -27,6 +28,7 @@ import { ConfigModule } from '@nestjs/config';
     }),
     MongooseModule.forRoot('mongodb://localhost:27017/BlogApp'),
     MongooseModule.forFeature([{name:User.name , schema:UserSchema}]),
+    MongooseModule.forFeature([{name:Post.name , schema:PostSchema}]),
 
     UserModule , AuthenticationModule , PostModule , LikeModule],
   controllers: [AppController, AuthenticationController, UserController, PostController, LikeController],
