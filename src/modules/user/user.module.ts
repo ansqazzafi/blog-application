@@ -18,9 +18,9 @@ import { JwtMiddleware } from 'src/middlewares/auth.middleware';
 export class UserModule {
     configure(consumer: MiddlewareConsumer) {
         consumer
-          .apply(JwtMiddleware)
-          .forRoutes(
-            { path: 'user/update-user', method: RequestMethod.PATCH }
-          );
+        .apply(JwtMiddleware)
+        .forRoutes(
+            { path: 'user/*', method: RequestMethod.ALL }
+        );
       }
 }

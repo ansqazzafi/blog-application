@@ -24,6 +24,7 @@ export class AuthenticationController {
         @Body() LoginDto: LoginUserDto,
         @Res({ passthrough: true }) response: Response
     ): Promise<SuccessHandler<loginResponse>> {
+        console.log(LoginDto , "33453");
         const loggedInUser = await this.authService.loginUser(LoginDto);
         const Options = {
             httpOnly: true,
@@ -36,7 +37,10 @@ export class AuthenticationController {
     }
 
     @Post('logout-user')
-    public async logoutUser(@Body() { userId }: { userId: string }, @Res({ passthrough: true }) response: Response): Promise<SuccessHandler> {
+    public async logoutUser(@Req() req:Request, @Res({ passthrough: true }) response: Response): Promise<SuccessHandler> {
+        const userId = req.user.id
+        console.log("User id : " , userId);
+        
         const responseFromService = await this.authService.logoutUser(userId);
         const Options = {
             httpOnly: true,

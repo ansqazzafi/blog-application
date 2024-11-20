@@ -21,7 +21,9 @@ export class PostModule {
         consumer
           .apply(JwtMiddleware)
           .forRoutes(
-            { path: 'post/create-post', method: RequestMethod.POST }
+            { path: 'post/create-post', method: RequestMethod.POST },
+            { path: 'post/delete-post/:postId', method: RequestMethod.DELETE },
+            { path: 'post/update-post/:postId', method: RequestMethod.PATCH },
           );
       }
 }

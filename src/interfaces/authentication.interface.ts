@@ -9,7 +9,6 @@ import { RegisterUserAddress } from "./user.interface";
       email: string;
       bio: string;
       phoneNumber: string;
-      status: boolean;
       isAdmin:boolean
       address: RegisterUserAddress;
       posts:[]

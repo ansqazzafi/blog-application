@@ -2,6 +2,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Schema as MongooseSchema } from 'mongoose';
 import { User } from '../user/user.schema';
 import { PostCategory } from 'src/enums/post.enum'; 
+import { status } from 'src/enums/poststatus.enum';
 
 @Schema({ timestamps: true })
 export class Post {
@@ -15,8 +16,8 @@ export class Post {
   @Prop({ required: true, type: MongooseSchema.Types.ObjectId, ref: 'User' })
   authorId: MongooseSchema.Types.ObjectId; 
 
-  @Prop({ required: true, default: false })
-  status?: boolean; 
+  @Prop({ required: true, enum: status , default:status.inActive })
+  status?: status; 
 
   @Prop({ required: true, enum: PostCategory })  
   category: PostCategory; 

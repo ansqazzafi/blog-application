@@ -50,8 +50,4 @@ export class RegisterUserDto {
     @IsBoolean()
     @IsOptional()
     isAdmin?: boolean;
-
-    @IsBoolean()
-    @IsOptional()
-    status?: boolean;
 }

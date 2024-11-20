@@ -18,7 +18,7 @@ import { User } from './modules/user/user.schema';
 import { UserSchema } from './modules/user/user.schema';
 import { JwtService } from '@nestjs/jwt';
 import { ResponseHandler } from './utility/success-response';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { Post, PostSchema } from './modules/post/post.schema';
 Post
 @Module({
@@ -26,7 +26,13 @@ Post
     ConfigModule.forRoot({
       isGlobal: true,
     }),
-    MongooseModule.forRoot('mongodb://localhost:27017/BlogApp'),
+    MongooseModule.forRootAsync({
+      imports: [ConfigModule], 
+      useFactory: async (configService: ConfigService) => ({
+        uri: configService.get<string>('MONGO_URI'), 
+      }), 
+      inject: [ConfigService],
+    }),
     MongooseModule.forFeature([{name:User.name , schema:UserSchema}]),
     MongooseModule.forFeature([{name:Post.name , schema:PostSchema}]),
 
